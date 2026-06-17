@@ -1,16 +1,20 @@
 # JobTracker API
 
-REST API built with FastAPI and SQLite to track job applications.
+REST API built with FastAPI and SQLite to track job applications, featuring JWT authentication.
 
 ## Tech Stack
 
 - Python 3.14
 - FastAPI
 - SQLite
+- JWT (python-jose)
+- Bcrypt (passlib)
 - Uvicorn
 
 ## Features
 
+- User registration and login with JWT authentication
+- Protected routes — each user manages their own applications
 - Create, list, update and delete job applications
 - Status validation with Enum (aplicado, entrevista, aprovado, reprovado)
 - Persistent SQLite database
@@ -21,7 +25,15 @@ REST API built with FastAPI and SQLite to track job applications.
 ### Installation
 
 ```bash
-pip install fastapi uvicorn
+pip install fastapi uvicorn python-jose passlib bcrypt python-multipart python-dotenv
+```
+
+### Environment Variables
+
+Create a `.env` file in the root folder:
+
+```
+SECRET_KEY=your-secret-key-here
 ```
 
 ### Run
@@ -30,7 +42,16 @@ pip install fastapi uvicorn
 uvicorn main:app --reload
 ```
 
-### API Endpoints
+## API Endpoints
+
+### Auth
+
+| Method | Route            | Description             |
+| ------ | ---------------- | ----------------------- |
+| POST   | `/auth/registro` | Register new user       |
+| POST   | `/auth/login`    | Login and get JWT token |
+
+### Vagas (requires JWT)
 
 | Method | Route         | Description               |
 | ------ | ------------- | ------------------------- |
@@ -40,6 +61,15 @@ uvicorn main:app --reload
 | DELETE | `/vagas/{id}` | Delete application        |
 
 ## Request Examples
+
+### Register
+
+```json
+{
+  "email": "user@email.com",
+  "senha": "yourpassword"
+}
+```
 
 ### Create application
 
