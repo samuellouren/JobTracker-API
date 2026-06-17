@@ -18,3 +18,15 @@ def criar_tabela():
 """)
     conn.commit()
     conn.close()
+
+def criar_tabela_usuarios():
+    conn = conectar()
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS usuarios(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email TEXT NOT NULL UNIQUE,
+            senha TEXT NOT NULL
+        )
+    """)
+    conn.commit()
+    conn.close()

@@ -1,17 +1,51 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, Depends
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.openapi.utils import get_openapi
 from pydantic import BaseModel
-from database import conectar, criar_tabela
 from enum import Enum
+from database import conectar, criar_tabela
+from auth import verificar_token
+import usuarios
 
+app = FastAPI()
+criar_tabela()
+
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+    openapi_schema = get_openapi(
+        title="JobTracker API",
+        version="1.0.0",
+        routes=app.routes,
+    )
+    openapi_schema["components"]["securitySchemes"] = {
+        "BearerAuth": {
+            "type": "http",
+            "scheme": "bearer",
+            "bearerFormat": "JWT",
+        }
+    }
+    for path in openapi_schema["paths"].values():
+        for method in path.values():
+            method["security"] = [{"BearerAuth": []}]
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+app.openapi = custom_openapi
+
+app.include_router(usuarios.router, prefix="/auth", tags=["Auth"])
+security = HTTPBearer()
+
+def obter_usuario(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    email = verificar_token(credentials.credentials)
+    if not email:
+        raise HTTPException(status_code=401, detail="Token invalido ou expirado")
+    return email
 class StatusVaga(str, Enum):
     aplicado = "aplicado"
     entrevista = "entrevista"
     aprovado = "aprovado"
     reprovado = "reprovado"
-
-app = FastAPI()
-criar_tabela()
-
 
 class Vaga(BaseModel):
     empresa: str

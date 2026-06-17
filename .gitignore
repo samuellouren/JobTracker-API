@@ -1,0 +1,5 @@
+vagas.db
+./__pycache__/
+.venv
+dxdiag_output.txt
+.env
